@@ -12,4 +12,9 @@ Once you have the image, type `docker-compose up`. Docker compose will run a `se
 * node1: `http://localhost:8001/health`
 * node2: `http://localhost:8002/health`
 
+Or you can check the members inside the cluster using the `/status/members` endpoint:
+* seed: `http://localhost:8000/status/members`
+* node1: `http://localhost:8001/status/members`
+* node2: `http://localhost:8002/status/members`
+
 That's it! Enjoy! :grin:
