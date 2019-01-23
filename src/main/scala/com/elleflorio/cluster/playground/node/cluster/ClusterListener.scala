@@ -1,4 +1,4 @@
-package com.elleflorio.cluster.playground
+package com.elleflorio.cluster.playground.node.cluster
 
 import akka.actor.{Actor, ActorLogging, Props}
 import akka.cluster.Cluster
@@ -8,24 +8,23 @@ object ClusterListener {
   def props(cluster: Cluster) = Props(new ClusterListener(cluster))
 }
 
-class ClusterListener(cluster: Cluster) extends Actor with ActorLogging{
+class ClusterListener(cluster: Cluster) extends Actor with ActorLogging {
 
-  // subscribe to cluster changes, re-subscribe when restart
   override def preStart(): Unit = {
     cluster.subscribe(self, initialStateMode = InitialStateAsEvents,
       classOf[MemberEvent], classOf[UnreachableMember])
   }
+
   override def postStop(): Unit = cluster.unsubscribe(self)
 
   def receive = {
-    case MemberUp(member) ⇒
+    case MemberUp(member) =>
       log.info("Member is Up: {}", member.address)
-    case UnreachableMember(member) ⇒
+    case UnreachableMember(member) =>
       log.info("Member detected as unreachable: {}", member)
-    case MemberRemoved(member, previousStatus) ⇒
-      log.info(
-        "Member is Removed: {} after {}",
+    case MemberRemoved(member, previousStatus) =>
+      log.info("Member is Removed: {} after {}",
         member.address, previousStatus)
-    case _: MemberEvent ⇒ // ignore
+    case _: MemberEvent => // ignore
   }
 }

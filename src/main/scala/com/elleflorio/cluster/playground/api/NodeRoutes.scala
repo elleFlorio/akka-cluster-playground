@@ -7,9 +7,11 @@ import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.Route
 import akka.pattern.ask
 import akka.util.Timeout
-import com.elleflorio.cluster.playground.ClusterManager.GetMembers
+
 import scala.concurrent.ExecutionContext.Implicits.global
-import spray.json.DefaultJsonProtocol._
+import com.elleflorio.cluster.playground.node.processor.ProcessorResponseJsonProtocol._
+import com.elleflorio.cluster.playground.node.Node.{GetClusterMembers, GetFibonacci}
+import com.elleflorio.cluster.playground.node.processor.ProcessorResponse
 
 import scala.concurrent.Future
 import scala.concurrent.duration._
@@ -41,12 +43,33 @@ trait NodeRoutes extends SprayJsonSupport {
           pathEnd {
             concat(
               get {
-                val membersFuture: Future[List[String]] = (node ? GetMembers).mapTo[List[String]]
+                val membersFuture: Future[List[String]] = (node ? GetClusterMembers).mapTo[List[String]]
                 onSuccess(membersFuture) { members =>
                   complete(StatusCodes.OK, members)
                 }
               }
             )
+          }
+        )
+      }
+    )
+  }
+
+  lazy val processRoutes: Route = pathPrefix("process") {
+    concat(
+      pathPrefix("fibonacci") {
+        concat(
+          path(IntNumber) { n =>
+            pathEnd {
+              concat(
+                get {
+                  val processFuture: Future[ProcessorResponse] = (node ? GetFibonacci(n)).mapTo[ProcessorResponse]
+                  onSuccess(processFuture) { response =>
+                    complete(StatusCodes.OK, response)
+                  }
+                }
+              )
+            }
           }
         )
       }

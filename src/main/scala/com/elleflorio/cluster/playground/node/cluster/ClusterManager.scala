@@ -1,9 +1,9 @@
-package com.elleflorio.cluster.playground
+package com.elleflorio.cluster.playground.node.cluster
 
-import akka.actor.{Actor, ActorLogging, Props}
+import akka.actor.{Actor, ActorLogging, ActorRef, Props}
 import akka.cluster.{Cluster, MemberStatus}
-import com.elleflorio.cluster.playground.ClusterManager.GetMembers
 import com.elleflorio.cluster.playground.Server.system
+import com.elleflorio.cluster.playground.node.cluster.ClusterManager.GetMembers
 
 object ClusterManager {
 
@@ -15,8 +15,8 @@ object ClusterManager {
 
 class ClusterManager(nodeId: String) extends Actor with ActorLogging {
 
-  val cluster = Cluster(context.system)
-  val listener = system.actorOf(ClusterListener.props(cluster))
+  val cluster: Cluster = Cluster(context.system)
+  val listener: ActorRef = system.actorOf(ClusterListener.props(cluster), "clusterListener")
 
   override def receive: Receive = {
     case GetMembers => {
