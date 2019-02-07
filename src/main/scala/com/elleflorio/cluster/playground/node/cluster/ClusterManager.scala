@@ -16,7 +16,7 @@ object ClusterManager {
 class ClusterManager(nodeId: String) extends Actor with ActorLogging {
 
   val cluster: Cluster = Cluster(context.system)
-  val listener: ActorRef = system.actorOf(ClusterListener.props(cluster), "clusterListener")
+  val listener: ActorRef = context.actorOf(ClusterListener.props(nodeId, cluster), "clusterListener")
 
   override def receive: Receive = {
     case GetMembers => {

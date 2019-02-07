@@ -5,10 +5,10 @@ import akka.cluster.Cluster
 import akka.cluster.ClusterEvent._
 
 object ClusterListener {
-  def props(cluster: Cluster) = Props(new ClusterListener(cluster))
+  def props(nodeId: String, cluster: Cluster) = Props(new ClusterListener(nodeId, cluster))
 }
 
-class ClusterListener(cluster: Cluster) extends Actor with ActorLogging {
+class ClusterListener(nodeId: String, cluster: Cluster) extends Actor with ActorLogging {
 
   override def preStart(): Unit = {
     cluster.subscribe(self, initialStateMode = InitialStateAsEvents,
@@ -19,12 +19,12 @@ class ClusterListener(cluster: Cluster) extends Actor with ActorLogging {
 
   def receive = {
     case MemberUp(member) =>
-      log.info("Member is Up: {}", member.address)
+      log.info("Node {} - Member is Up: {}", nodeId, member.address)
     case UnreachableMember(member) =>
-      log.info("Member detected as unreachable: {}", member)
+      log.info(s"Node {} - Member detected as unreachable: {}", nodeId, member)
     case MemberRemoved(member, previousStatus) =>
-      log.info("Member is Removed: {} after {}",
-        member.address, previousStatus)
+      log.info(s"Node {} - Member is Removed: {} after {}",
+        nodeId, member.address, previousStatus)
     case _: MemberEvent => // ignore
   }
 }
